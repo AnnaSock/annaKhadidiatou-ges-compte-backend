@@ -11,7 +11,7 @@ services:
     ports:
       - "8000:80"        # Port exposé sur la machine hôte : 8000
     environment:
-      - PORT=80          # Définition claire de la variable d'environnement
+      - PORT=8000          # Définition claire de la variable d'environnement
     volumes:
       - ./nginx/conf.d/:/etc/nginx/conf.d/
       - ./:/var/www/html
