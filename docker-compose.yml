@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   app:
     build: .
@@ -10,12 +9,14 @@ services:
   webserver:
     image: nginx:alpine
     ports:
-      - "8000:80"
+      - "8000:80"        # Port exposé sur la machine hôte : 8000
+    environment:
+      - PORT=80          # Définition claire de la variable d'environnement
     volumes:
-      - ./:/var/www/html
       - ./nginx/conf.d/:/etc/nginx/conf.d/
+      - ./:/var/www/html
     depends_on:
-      - app
+      - app              # Syntaxe simplifiée pour depends_on
 
   db:
     image: postgres:15
@@ -24,4 +25,7 @@ services:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5433:5432"
+      - target: 5432
+        published: 5434
+        protocol: tcp
+        mode: host
