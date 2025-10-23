@@ -1,0 +1,22 @@
+# Ignorer les fichiers d'environnement
+.env
+.env.local
+.env.*.local
+
+# Ignorer les dossiers node_modules et vendor (si on veut réinstaller dans le conteneur)
+node_modules
+vendor
+
+# Ignorer fichiers de logs
+*.log
+
+# Ignorer fichiers de cache et OS
+.DS_Store
+Thumbs.db
+.git
+.gitignore
+
+# Ignorer les fichiers de documentation ou configs locales inutiles
+docs/
+tests/
+phpunit.xml
