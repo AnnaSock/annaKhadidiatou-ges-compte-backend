@@ -6,6 +6,7 @@ return [
     'default' => [
         'api' => [
             'title' => 'L5 Swagger UI',
+            'schemes' => ['https'],
         ],
         'routes' => [
             'api' => 'api/v1/documentation',
@@ -298,7 +299,7 @@ return [
          * Constants which can be used in annotations
          */
         'constants' => [
-            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', 'http://localhost:8081/api'),
+            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST',  'https://annakhadidiatou-ges-compte-backend.onrender.com/api'),
         ],
     ],
 ];
