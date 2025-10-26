@@ -1,0 +1,364 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API de Gestion de Comptes",
+        "description": "API coder en laravel REST pour la gestion des comptes bancaires, utilisateurs et transactions",
+        "contact": {
+            "email": "annasock542@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8081/api",
+            "description": "Serveur API"
+        }
+    ],
+    "paths": {
+        "/api/comptes": {
+            "get": {
+                "tags": [
+                    "Comptes"
+                ],
+                "summary": "Lister tous les comptes",
+                "operationId": "4059c2a0b4cce9e57227146f5b16138d",
+                "responses": {
+                    "200": {
+                        "description": "Liste des comptes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Compte"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Comptes"
+                ],
+                "summary": "Créer un nouveau compte",
+                "operationId": "d46221922144c672a4a500c7f3755629",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreCompteRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Compte créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Compte"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/comptes/{compte}": {
+            "get": {
+                "tags": [
+                    "Comptes"
+                ],
+                "summary": "Afficher un compte spécifique",
+                "operationId": "1112770610cc4c38465bf96864ecbda3",
+                "parameters": [
+                    {
+                        "name": "compte",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails du compte",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Compte"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Comptes"
+                ],
+                "summary": "Mettre à jour un compte",
+                "operationId": "497a1b9d261322d3077bf6d5581302e9",
+                "parameters": [
+                    {
+                        "name": "compte",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCompteRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Compte mis à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Compte"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Comptes"
+                ],
+                "summary": "Supprimer un compte",
+                "operationId": "a7891fca561d7991f2804d600f869cc6",
+                "parameters": [
+                    {
+                        "name": "compte",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Compte supprimé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Compte": {
+                "title": "Compte",
+                "description": "Modèle représentant un compte bancaire",
+                "properties": {
+                    "id": {
+                        "description": "ID unique du compte",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "numero_compte": {
+                        "description": "Numéro du compte",
+                        "type": "string"
+                    },
+                    "solde_initial": {
+                        "description": "Solde initial du compte",
+                        "type": "number",
+                        "format": "decimal"
+                    },
+                    "date_creation": {
+                        "description": "Date de création",
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "devise": {
+                        "description": "Devise du compte",
+                        "type": "string",
+                        "default": "XOF"
+                    },
+                    "statut_compte": {
+                        "description": "Statut du compte",
+                        "type": "string",
+                        "enum": [
+                            "actif",
+                            "bloqué",
+                            "fermé"
+                        ]
+                    },
+                    "type_compte": {
+                        "description": "Type de compte",
+                        "type": "string",
+                        "enum": [
+                            "chèque",
+                            "épargne"
+                        ]
+                    },
+                    "version": {
+                        "description": "Version du compte",
+                        "type": "integer"
+                    },
+                    "user_id": {
+                        "description": "ID de l'utilisateur propriétaire",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreCompteRequest": {
+                "title": "StoreCompteRequest",
+                "description": "Requête de création d'un compte",
+                "required": [
+                    "numero_compte",
+                    "solde_initial",
+                    "date_creation",
+                    "type_compte"
+                ],
+                "properties": {
+                    "numero_compte": {
+                        "description": "Numéro unique du compte",
+                        "type": "string"
+                    },
+                    "solde_initial": {
+                        "description": "Solde initial",
+                        "type": "number",
+                        "format": "decimal"
+                    },
+                    "date_creation": {
+                        "description": "Date de création",
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "devise": {
+                        "description": "Devise",
+                        "type": "string",
+                        "default": "XOF"
+                    },
+                    "statut_compte": {
+                        "type": "string",
+                        "default": "actif",
+                        "enum": [
+                            "actif",
+                            "bloqué",
+                            "fermé"
+                        ]
+                    },
+                    "type_compte": {
+                        "description": "Type de compte",
+                        "type": "string",
+                        "enum": [
+                            "chèque",
+                            "épargne"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateCompteRequest": {
+                "title": "UpdateCompteRequest",
+                "description": "Requête de mise à jour d'un compte",
+                "properties": {
+                    "numero_compte": {
+                        "description": "Numéro unique du compte",
+                        "type": "string"
+                    },
+                    "solde_initial": {
+                        "description": "Solde initial",
+                        "type": "number",
+                        "format": "decimal"
+                    },
+                    "date_creation": {
+                        "description": "Date de création",
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "devise": {
+                        "description": "Devise",
+                        "type": "string"
+                    },
+                    "statut_compte": {
+                        "type": "string",
+                        "enum": [
+                            "actif",
+                            "bloqué",
+                            "fermé"
+                        ]
+                    },
+                    "type_compte": {
+                        "type": "string",
+                        "enum": [
+                            "chèque",
+                            "épargne"
+                        ]
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "sanctum": {
+                "type": "apiKey",
+                "description": "Token Bearer pour l'authentification",
+                "name": "Authorization",
+                "in": "header"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Comptes",
+            "description": "Gestion des comptes bancaires"
+        }
+    ]
+}

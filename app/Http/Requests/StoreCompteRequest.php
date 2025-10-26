@@ -11,7 +11,7 @@ class StoreCompteRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,12 @@ class StoreCompteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'numero_compte' => 'required|string|unique:comptes,numero_compte',
+            'solde_initial' => 'required|numeric|min:0',
+            'date_creation' => 'required|date',
+            'devise' => 'string|default:XOF',
+            'statut_compte' => 'string|in:actif,bloqué,fermé',
+            'type_compte' => 'required|string|in:chèque,épargne',
         ];
     }
 }
