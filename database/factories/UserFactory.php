@@ -2,43 +2,41 @@
 
 namespace Database\Factories;
 
+use App\Enums\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
-
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'id' => Str::uuid(),
+            'nom' => $this->faker->lastName(),
+            'prenom' => $this->faker->firstName(),
+            'telephone' => $this->generateSenegalesePhoneNumber(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'mot_de_passe' => bcrypt('password'),
+            'adresse' => $this->faker->address(),
+            'role' => Role::Client, // Valeur par défaut
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Génère un numéro de téléphone sénégalais valide
      */
-    public function unverified(): static
+    private function generateSenegalesePhoneNumber(): string
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        // Préfixes téléphoniques sénégalais
+        $prefixes = ['77', '78', '76', '70', '75', '33'];
+
+        // Choisir un préfixe aléatoire
+        $prefix = $this->faker->randomElement($prefixes);
+
+        // Générer 7 chiffres aléatoires
+        $number = $this->faker->unique()->numberBetween(1000000, 9999999);
+
+        // Retourner le numéro au format +221 XX XXX XX XX
+        return '+221 ' . substr($prefix, 0, 1) . substr($prefix, 1, 1) . ' ' . substr($number, 0, 3) . ' ' . substr($number, 3, 2) . ' ' . substr($number, 5, 2);
     }
 }
