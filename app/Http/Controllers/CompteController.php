@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\CompteNotFoundException;
 use App\Http\Requests\StoreCompteRequest;
 use App\Http\Requests\UpdateCompteRequest;
+use App\Http\Resources\CompteResource;
 use App\Models\Compte;
+use App\Services\PaginationService;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -15,25 +19,74 @@ use Illuminate\Http\Request;
  */
 class CompteController extends Controller
 {
+    use ApiResponse;
     /**
      * @OA\Get(
-     *     path="/api/comptes",
-     *     summary="Lister tous les comptes",
+     *     path="/api/v1/comptes",
+     *     summary="Lister tous les comptes actifs et valides",
      *     tags={"Comptes"},
      *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         description="Nombre d'éléments par page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=10)
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Numéro de la page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Liste des comptes",
+     *         description="Liste des comptes avec pagination",
      *         @OA\JsonContent(
-     *             type="array",
-     *             @OA\Items(ref="#/components/schemas/Compte")
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Compte")),
+     *             @OA\Property(property="message", type="string", example="Comptes récupérés avec succès"),
+     *             @OA\Property(property="pagination", ref="#/components/schemas/Pagination"),
+     *             @OA\Property(property="links", ref="#/components/schemas/Links")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Rôle non autorisé",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Rôle non autorisé.")
      *         )
      *     )
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        // $role = $request->header('X-User-Role'); // admin ou client
+        // $userId = $request->header('X-User-Id'); // utile pour filtrer les comptes client
+        $limit = (int) $request->query('limit', 10);
+        $page = (int) $request->query('page', 1);
+
+        $query = Compte::query()
+            ->actifs()
+            ->typeValide();
+            // ->parRole($role, $userId);
+
+        $result = PaginationService::paginate($query, $page, $limit, $request->url());
+
+        if (empty($result['items']) || count($result['items']) === 0) {
+            throw new CompteNotFoundException();
+        }
+
+        return $this->successResponse(
+            CompteResource::collection($result['items']),
+            'Comptes récupérés avec succès',
+            $result['pagination'],
+            $result['links']
+        );
     }
 
     /**
