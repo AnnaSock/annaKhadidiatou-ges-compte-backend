@@ -2,11 +2,13 @@
 
 namespace App\Exceptions;
 
+use App\Traits\ApiResponse;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
+    use ApiResponse;
     /**
      * The list of the inputs that are never flashed to the session on validation exceptions.
      *
@@ -27,4 +29,14 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+     public function render($request, Throwable $exception)
+    {
+        if ($exception instanceof CompteNotFoundException) {
+            return $this->errorResponse($exception->getMessage(), $exception->getCode());
+        }
+
+        return parent::render($request, $exception);
+    }
+
 }

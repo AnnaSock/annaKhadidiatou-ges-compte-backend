@@ -24,19 +24,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Routes pour les comptes
-Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('comptes', CompteController::class);
-});
-
-// Routes pour les utilisateurs (Admin/Client)
-Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('admins', AdminController::class);
-    Route::apiResource('clients', ClientController::class);
-    Route::apiResource('users', UserController::class);
-});
-
-// Routes pour les transactions
-Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('transactions', TransactionController::class);
+Route::prefix('v1')->group(function () {
+    // Route GET pour lister les comptes non archivés
+    Route::get('/comptes', [CompteController::class, 'index']);
 });

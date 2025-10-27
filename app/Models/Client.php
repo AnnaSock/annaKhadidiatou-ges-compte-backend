@@ -6,6 +6,8 @@ use App\Enums\Role;
 
 class Client extends User
 {
+
+    protected $table = 'users';
     protected $attributes = [
         'role' => Role::Client,
     ];
