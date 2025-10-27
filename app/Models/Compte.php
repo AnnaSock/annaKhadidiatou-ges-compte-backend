@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\StatutCompte;
 use App\Enums\TypeCompte;
+use App\Enums\TypeTransaction;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -123,8 +124,8 @@ class Compte extends Model
 
     public function getSoldeAttribute(): float
     {
-        $depots = $this->transactions()->where('type_transaction', 'depot')->sum('montant');
-        $retraits = $this->transactions()->where('type_transaction', 'retrait')->sum('montant');
+        $depots = $this->transactions()->where('type_transaction', TypeTransaction::Depot->value)->sum('montant');
+        $retraits = $this->transactions()->where('type_transaction', TypeTransaction::Retrait->value)->sum('montant');
 
         return $this->solde_initial + $depots - $retraits;
     }
