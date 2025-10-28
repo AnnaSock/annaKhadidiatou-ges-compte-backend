@@ -9,7 +9,7 @@ trait ApiResponse
     /**
      * Réponse JSON formatée
      */
-    public function successResponse($data = [], $message = '', $pagination = null, $links = null): JsonResponse
+    public function successResponse($data = [], $message = '', $pagination = null, $links = null, $code = 200): JsonResponse
     {
         return response()->json([
             'success' => true,
@@ -17,7 +17,7 @@ trait ApiResponse
             'message' => $message,
             'pagination' => $pagination,
             'links' => $links,
-        ]);
+        ], $code);
     }
 
     public function errorResponse($message = '', $code = 400, $data = []): JsonResponse
