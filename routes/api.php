@@ -24,7 +24,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::prefix('v1')->group(function () {
-    // Route GET pour lister les comptes non archivés
+Route::prefix('/v1')->group(function () {
+    // Route GET pour lister les comptes actifs et valides
     Route::get('/comptes', [CompteController::class, 'index']);
+
+    // Route GET pour récupérer un compte spécifique
+    Route::get('/comptes/{compte}', [CompteController::class, 'show']);
 });
