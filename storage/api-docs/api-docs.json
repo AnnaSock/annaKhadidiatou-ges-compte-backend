@@ -10,12 +10,17 @@
     },
     "servers": [
         {
-            "url": "http://localhost:8081/api",
-            "description": "Serveur API"
+            "url": "http://localhost:8081/api/v1/",
+            "description": "Serveur Local"
+        },
+
+        {
+            "url": "https://annakhadidiatou-ges-compte-backend.onrender.com/",
+            "description": "Serveur Production"
         }
     ],
     "paths": {
-        "/api/comptes": {
+        "/comptes": {
             "get": {
                 "tags": [
                     "Comptes"
