@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\StatutCompte;
+use App\Enums\TypeCompte;
 use App\Exceptions\CompteNotFoundException;
 use App\Http\Requests\StoreCompteRequest;
 use App\Http\Requests\UpdateCompteRequest;
@@ -22,7 +24,7 @@ class CompteController extends Controller
     use ApiResponse;
     /**
      * @OA\Get(
-     *     path="/api/v1/comptes",
+     *     path="/annaSock/v1/comptes",
      *     summary="Lister tous les comptes actifs et valides",
      *     tags={"Comptes"},
      *     security={{"sanctum":{}}},
@@ -121,26 +123,68 @@ class CompteController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/comptes/{compte}",
-     *     summary="Afficher un compte spécifique",
+     *     path="/annaSock/v1/comptes/{compte}",
+     *     summary="Récupérer un compte spécifique",
+     *     description="Par défaut, la recherche se fait sur la base locale lorsque le compte est chèque ou épargne actif. Utilise le Route Model Binding et la validation.",
      *     tags={"Comptes"},
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
      *         name="compte",
      *         in="path",
      *         required=true,
+     *         description="UUID du compte",
      *         @OA\Schema(type="string", format="uuid")
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Détails du compte",
-     *         @OA\JsonContent(ref="#/components/schemas/Compte")
+     *         description="Détails du compte récupéré avec succès",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", ref="#/components/schemas/Compte"),
+     *             @OA\Property(property="message", type="string", example="Compte récupéré avec succès")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Compte non trouvé",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Compte non trouvé.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Accès non autorisé",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Accès non autorisé.")
+     *         )
      *     )
      * )
      */
     public function show(Compte $compte)
     {
-        //
+        // Validation automatique via Route Model Binding
+        // Le modèle Compte est automatiquement résolu par Laravel
+        // avec les scopes globaux appliqués (not_deleted)
+
+        // Vérification supplémentaire : compte doit être actif et de type valide
+        if ($compte->statut_compte !== StatutCompte::Actif) {
+            throw new CompteNotFoundException('Le compte n\'est pas actif.');
+        }
+
+        if (!in_array($compte->type_compte, [TypeCompte::Cheque, TypeCompte::Epargne])) {
+            throw new CompteNotFoundException('Type de compte non valide pour cette opération.');
+        }
+
+        // Retourner la réponse formatée avec le trait ApiResponse
+        return $this->successResponse(
+            new CompteResource($compte),
+            'Compte récupéré avec succès'
+        );
     }
 
     /**

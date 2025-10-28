@@ -6,6 +6,6 @@ use Exception;
 
 class CompteNotFoundException extends Exception
 {
-    protected $message = 'Aucun compte trouvé pour cet utilisateur.';
+    protected $message = 'Aucun compte trouvé';
     protected $code = 404;
 }
