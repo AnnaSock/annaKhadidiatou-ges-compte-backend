@@ -28,8 +28,13 @@ class ClientSeeder extends Seeder
             ]);
 
             $comptesEpargne->each(function ($compte) {
-                // Créer 10 transactions par compte avec différents statuts
-                Transaction::factory(10)->create([
+                // Créer des transactions pour chaque compte (d'abord des dépôts, puis des retraits)
+                Transaction::factory(5)->create([
+                    'compte_id' => $compte->id,
+                    'type_transaction' => 'dépôt', // Forcer des dépôts d'abord
+                ]);
+
+                Transaction::factory(5)->retrait()->create([
                     'compte_id' => $compte->id,
                 ]);
             });
@@ -42,8 +47,13 @@ class ClientSeeder extends Seeder
             ]);
 
             $compteCheque->each(function ($compte) {
-                // Créer 10 transactions par compte avec différents statuts
-                Transaction::factory(10)->create([
+                // Créer des transactions pour chaque compte (d'abord des dépôts, puis des retraits)
+                Transaction::factory(5)->create([
+                    'compte_id' => $compte->id,
+                    'type_transaction' => 'dépôt', // Forcer des dépôts d'abord
+                ]);
+
+                Transaction::factory(5)->retrait()->create([
                     'compte_id' => $compte->id,
                 ]);
             });

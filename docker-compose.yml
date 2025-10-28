@@ -13,10 +13,11 @@ services:
             APP_ENV: ${APP_ENV:-local}
             APP_DEBUG: ${APP_DEBUG:-1}
             APP_URL: ${APP_URL:-http://localhost}
+            
         volumes:
             - ./:/var/www/html
         depends_on:
-            - db
+            - dbpostgres
         networks:
             - laravel-net
         ports:
@@ -50,14 +51,14 @@ services:
     # ===============================
     # 🗄️ Base de données PostgreSQL
     # ===============================
-    db:
+    dbpostgres:
         image: postgres:15-alpine
         container_name: laravel-db
         restart: unless-stopped
         environment:
-            POSTGRES_USER: laravel
-            POSTGRES_PASSWORD: laravel
-            POSTGRES_DB: laravel
+            POSTGRES_USER: laravel_compte
+            POSTGRES_PASSWORD: laravel_compte
+            POSTGRES_DB: laravel_compte
         volumes:
             - db_data:/var/lib/postgresql/data
         networks:
@@ -69,7 +70,9 @@ services:
 # 🔗 Réseau & volumes partagés
 # ===============================
 networks:
-    laravel-net:
+  laravel-net:
+    name: laravel-networks
+    driver: bridge
 
 volumes:
     db_data:

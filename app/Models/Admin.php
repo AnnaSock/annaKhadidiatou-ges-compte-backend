@@ -6,6 +6,7 @@ use App\Enums\Role;
 
 class Admin extends User
 {
+    protected $table = 'users';
     protected $attributes = [
         'role' => Role::Admin,
     ];

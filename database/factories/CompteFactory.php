@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\StatutCompte;
 use App\Enums\TypeCompte;
-use App\Models\User;
+use App\Models\Client;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -21,7 +21,7 @@ class CompteFactory extends Factory
             'statut_compte' => $this->faker->randomElement(StatutCompte::cases())->value,
             'type_compte' => $this->faker->randomElement(TypeCompte::cases())->value,
             'version' => 1,
-            'user_id' => User::factory(),
+            'user_id' => Client::factory()->create()->id,
         ];
     }
 }
