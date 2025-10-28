@@ -9,7 +9,7 @@ return [
             'schemes' => ['https'],
         ],
         'routes' => [
-            'api' => 'api/v1/documentation',
+            'api' => 'annaSock/v1/documentation',
         ],
         'paths' => [
             'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', true),
