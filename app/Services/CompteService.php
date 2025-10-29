@@ -109,7 +109,7 @@ class CompteService
 
             // Créer le compte
             return \App\Models\Compte::create([
-                'id' => \Illuminate\Support\Str::uuid(),
+                'id' => Str::uuid(),
                 'numero_compte' => self::generateNumeroCompte(),
                 'solde_initial' => $data['soldeInitial'],
                 'date_creation' => now(),
@@ -146,7 +146,7 @@ class CompteService
         } else {
             // Nouveau client
             return \App\Models\Client::create([
-                'id' => \Illuminate\Support\Str::uuid(),
+                'id' => Str::uuid(),
                 'nom' => explode(' ', $clientData['titulaire'])[0] ?? '',
                 'prenom' => explode(' ', $clientData['titulaire'])[1] ?? '',
                 'telephone' => $clientData['telephone'],
