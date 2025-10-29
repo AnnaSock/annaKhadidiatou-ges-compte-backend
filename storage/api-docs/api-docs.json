@@ -9,11 +9,17 @@
         "version": "1.0.0"
     },
     "servers": [
-
         {
             "url": "https://annakhadidiatou-ges-compte-backend.onrender.com/",
             "description": "Serveur Production"
+        },
+
+        {
+            "url": "http://localhost:8081/",
+            "description": "Serveur Local"
+
         }
+
     ],
     "paths": {
         "/annaSock/v1/comptes": {

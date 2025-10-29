@@ -13,6 +13,7 @@ class CompteResource extends JsonResource
             'id' => $this->id,
             'numeroCompte' => $this->numero_compte,
             'titulaire' => $this->titulaire,
+            'nci' => $this->utilisateur->nci,
             'type' => $this->type_compte->value,
             'solde' => $this->solde,
             'devise' => $this->devise,

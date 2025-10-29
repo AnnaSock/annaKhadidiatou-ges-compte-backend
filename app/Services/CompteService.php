@@ -118,8 +118,8 @@ class CompteService
     public static function creerCompte(array $data): \App\Models\Compte
     {
         return \Illuminate\Support\Facades\DB::transaction(function () use ($data) {
-            // Gestion du client (nouveau ou existant)
-            $client = self::getOrCreateClient($data['client']);
+            // Récupération de l'ID du client (nouveau ou existant)
+            $clientId = self::getOrCreateClient($data['client']);
 
             // Créer le compte
             return \App\Models\Compte::create([
@@ -131,7 +131,7 @@ class CompteService
                 'statut_compte' => \App\Enums\StatutCompte::Actif->value,
                 'type_compte' => $data['type'],
                 'version' => 1,
-                'user_id' => is_string($client) ? $client : $client->id,
+                'user_id' => $clientId,
             ]);
         });
     }
@@ -140,25 +140,22 @@ class CompteService
      * Récupère un client existant ou en crée un nouveau
      *
      * @param array $clientData
-     * @return \App\Models\Client
+     * @return string
      */
     private static function getOrCreateClient(array $clientData): string
     {
+        $client = null;
+
         if (isset($clientData['nci']) && $clientData['nci']) {
-            // Vérifier d'abord que le NCI existe et est un client
-            $user = \Illuminate\Support\Facades\DB::table('users')
+            // Vérifier si le NCI existe et est un client
+            $client = \Illuminate\Support\Facades\DB::table('users')
                 ->where('nci', $clientData['nci'])
                 ->where('role', 'client')
                 ->first();
+        }
 
-            if (!$user) {
-                throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Client non trouvé');
-            }
-
-            // Retourner l'ID du client trouvé
-            return $user->id;
-        } else {
-            // Nouveau client
+        if (!$client) {
+            // Créer un nouveau client
             $client = \App\Models\Client::create([
                 'id' => Str::uuid(),
                 'nom' => explode(' ', $clientData['titulaire'])[0] ?? '',
@@ -169,8 +166,8 @@ class CompteService
                 'adresse' => $clientData['adresse'],
                 'nci' => $clientData['nci'] ?? null,
             ]);
-
-            return $client->id;
         }
+
+        return $client->id;
     }
 }

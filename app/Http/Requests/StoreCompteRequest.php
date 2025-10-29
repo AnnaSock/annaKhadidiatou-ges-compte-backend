@@ -35,9 +35,9 @@ class StoreCompteRequest extends FormRequest
             'client.id' => 'nullable|exists:users,id',
 
             // Champs obligatoires seulement pour un NOUVEAU client
-            'client.titulaire' => 'required_if:client.id,null|string|max:255',
+            'client.titulaire' => 'nullable|string|max:255',
             'client.nci' => [
-                'nullable',
+                'required',
                 'string',
                 'max:20',
                 function ($attribute, $value, $fail) {
@@ -47,13 +47,13 @@ class StoreCompteRequest extends FormRequest
                 }
             ],
             'client.email' => [
-                'required_if:client.id,null',
+                'nullable',
                 'email',
                 'max:255',
                 Rule::unique('users', 'email')->ignore($this->input('client.id'))
             ],
             'client.telephone' => [
-                'required_if:client.id,null',
+                'nullable',
                 'string',
                 'max:20',
                 function ($attribute, $value, $fail) {
@@ -63,7 +63,7 @@ class StoreCompteRequest extends FormRequest
                 },
                 Rule::unique('users', 'telephone')->ignore($this->input('client.id'))
             ],
-            'client.adresse' => 'required_if:client.id,null|string|max:500',
+            'client.adresse' => 'nullable|string|max:500',
         ];
     }
 
