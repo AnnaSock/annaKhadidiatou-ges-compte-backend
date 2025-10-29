@@ -34,19 +34,33 @@ class CompteService
 
     /**
      * Génère un numéro de téléphone sénégalais valide (pour les tests/factory)
-     *
-     * @return string
-     */
-    public static function generateSenegalesePhoneNumber(): string
-    {
-        $prefixes = ['77', '78', '76', '70', '75', '33'];
+      *
+      * @return string
+      */
+     public static function generateSenegalesePhoneNumber(): string
+     {
+         $prefixes = ['77', '78', '76', '70', '75', '33'];
 
-        $prefix = $prefixes[array_rand($prefixes)];
+         $prefix = $prefixes[array_rand($prefixes)];
 
-        $number = str_pad(rand(1000000, 9999999), 7, '0', STR_PAD_LEFT);
+         $number = str_pad(rand(1000000, 9999999), 7, '0', STR_PAD_LEFT);
 
-        return '+221 ' . substr($prefix, 0, 1) . substr($prefix, 1, 1) . ' ' . substr($number, 0, 3) . ' ' . substr($number, 3, 2) . ' ' . substr($number, 5, 2);
-    }
+         return '+221 ' . substr($prefix, 0, 1) . substr($prefix, 1, 1) . ' ' . substr($number, 0, 3) . ' ' . substr($number, 3, 2) . ' ' . substr($number, 5, 2);
+     }
+
+     /**
+      * Génère un numéro CNI sénégalais valide (pour les tests/factory)
+      *
+      * @return string
+      */
+     public static function generateSenegaleseCniNumber(): string
+     {
+         $numbers = str_pad(rand(10000000000, 99999999999), 13, '0', STR_PAD_LEFT);
+         $letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+         $letter = $letters[array_rand($letters)];
+
+         return $numbers . $letter;
+     }
 
     /**
      * Génère un numéro de compte unique
@@ -128,24 +142,24 @@ class CompteService
      * @param array $clientData
      * @return \App\Models\Client
      */
-    private static function getOrCreateClient(array $clientData): \App\Models\Client
+    private static function getOrCreateClient(array $clientData): string
     {
-        if (isset($clientData['id']) && $clientData['id']) {
-            // Vérifier d'abord que l'ID existe et est un client
-            $exists = \Illuminate\Support\Facades\DB::table('users')
-                ->where('id', $clientData['id'])
+        if (isset($clientData['nci']) && $clientData['nci']) {
+            // Vérifier d'abord que le NCI existe et est un client
+            $user = \Illuminate\Support\Facades\DB::table('users')
+                ->where('nci', $clientData['nci'])
                 ->where('role', 'client')
-                ->exists();
+                ->first();
 
-            if (!$exists) {
+            if (!$user) {
                 throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Client non trouvé');
             }
 
-            // Retourner l'ID seulement - Laravel gérera la résolution du modèle
-            return $clientData['id'];
+            // Retourner l'ID du client trouvé
+            return $user->id;
         } else {
             // Nouveau client
-            return \App\Models\Client::create([
+            $client = \App\Models\Client::create([
                 'id' => Str::uuid(),
                 'nom' => explode(' ', $clientData['titulaire'])[0] ?? '',
                 'prenom' => explode(' ', $clientData['titulaire'])[1] ?? '',
@@ -153,7 +167,10 @@ class CompteService
                 'email' => $clientData['email'],
                 'mot_de_passe' => bcrypt('password'), // Mot de passe par défaut
                 'adresse' => $clientData['adresse'],
+                'nci' => $clientData['nci'] ?? null,
             ]);
+
+            return $client->id;
         }
     }
 }

@@ -24,6 +24,7 @@ abstract class User extends Authenticatable
         'mot_de_passe',
         'adresse',
         'role',
+        'nci',
     ];
 
     protected $casts = [

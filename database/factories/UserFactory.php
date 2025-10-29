@@ -19,6 +19,7 @@ class UserFactory extends Factory
             'mot_de_passe' => bcrypt('password'),
             'adresse' => $this->faker->address(),
             'role' => Role::Client, // Valeur par défaut
+            'nci' => $this->generateSenegaleseCniNumber(),
         ];
     }
 
@@ -28,5 +29,13 @@ class UserFactory extends Factory
     private function generateSenegalesePhoneNumber(): string
     {
         return \App\Services\CompteService::generateSenegalesePhoneNumber();
+    }
+
+    /**
+     * Génère un numéro CNI sénégalais valide
+     */
+    private function generateSenegaleseCniNumber(): string
+    {
+        return \App\Services\CompteService::generateSenegaleseCniNumber();
     }
 }

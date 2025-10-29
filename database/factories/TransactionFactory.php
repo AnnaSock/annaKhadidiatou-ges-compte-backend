@@ -29,26 +29,27 @@ class TransactionFactory extends Factory
     /**
      * Créer une transaction de retrait avec vérification du solde
      */
-    public function retrait(): static
-    {
-        return $this->state(function (array $attributes) {
-            $compte = Compte::find($attributes['compte_id']);
+   public function retrait(): Factory
+{
+    return $this->state(function (array $attributes) {
+        $compte = Compte::find($attributes['compte_id']);
 
-            if ($compte) {
-                $soldeDisponible = $compte->solde_initial +
-                    $compte->transactions()->where('type_transaction', TypeTransaction::Depot->value)->sum('montant') -
-                    $compte->transactions()->where('type_transaction', TypeTransaction::Retrait->value)->sum('montant');
+        if ($compte) {
+            $soldeDisponible = $compte->solde_initial +
+                $compte->transactions()->where('type_transaction', TypeTransaction::Depot->value)->sum('montant') -
+                $compte->transactions()->where('type_transaction', TypeTransaction::Retrait->value)->sum('montant');
 
-                $montant = min($attributes['montant'], $soldeDisponible);
-                $montant = max($montant, 100); // Montant minimum pour éviter 0
+            $montant = min($attributes['montant'] ?? 0, $soldeDisponible);
+            $montant = max($montant, 100); // Montant minimum pour éviter 0
 
-                return [
-                    'type_transaction' => TypeTransaction::Retrait->value,
-                    'montant' => $montant,
-                ];
-            }
+            return [
+                'type_transaction' => TypeTransaction::Retrait->value,
+                'montant' => $montant,
+            ];
+        }
 
-            return $attributes;
-        });
-    }
+        return $attributes;
+    });
+}
+
 }
