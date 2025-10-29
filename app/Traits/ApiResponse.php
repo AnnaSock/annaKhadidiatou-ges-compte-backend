@@ -2,14 +2,15 @@
 
 namespace App\Traits;
 
+use App\Enums\HttpStatusCodes;
 use Illuminate\Http\JsonResponse;
 
 trait ApiResponse
 {
     /**
-     * Réponse JSON formatée
+     * Réponse JSON formatée pour les succès
      */
-    public function successResponse($data = [], $message = '', $pagination = null, $links = null, $code = 200): JsonResponse
+    public function successResponse($data = [], $message = '', $pagination = null, $links = null, $code = HttpStatusCodes::OK): JsonResponse
     {
         return response()->json([
             'success' => true,
@@ -17,15 +18,31 @@ trait ApiResponse
             'message' => $message,
             'pagination' => $pagination,
             'links' => $links,
-        ], $code);
+        ], $code instanceof HttpStatusCodes ? $code->value : $code);
     }
 
-    public function errorResponse($message = '', $code = 400, $data = []): JsonResponse
+    /**
+     * Réponse JSON formatée pour les erreurs
+     */
+    public function errorResponse($message = '', $code = HttpStatusCodes::BAD_REQUEST, $data = []): JsonResponse
     {
-        return response()->json([
+        $response = [
             'success' => false,
             'message' => $message,
-            'data' => $data
-        ], $code);
+        ];
+
+        // Pour les erreurs de validation (400), on utilise le format avec 'error'
+        if ($code instanceof HttpStatusCodes && $code === HttpStatusCodes::BAD_REQUEST) {
+            $response['error'] = [
+                'code' => HttpStatusCodes::BAD_REQUEST,
+                'message' => $message,
+                'details' => $data
+            ];
+            unset($response['message']);
+        } else {
+            $response['data'] = $data;
+        }
+
+        return response()->json($response, $code instanceof HttpStatusCodes ? $code->value : $code);
     }
 }
