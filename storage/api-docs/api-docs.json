@@ -9,10 +9,6 @@
         "version": "1.0.0"
     },
     "servers": [
-        {
-            "url": "http://localhost:8081/",
-            "description": "Serveur Local"
-        },
 
         {
             "url": "https://annakhadidiatou-ges-compte-backend.onrender.com/",
