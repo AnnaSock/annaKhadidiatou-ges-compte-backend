@@ -21,6 +21,7 @@ class Compte extends Model
     protected $appends = ['solde', 'titulaire'];
 
     protected $fillable = [
+        'id',
         'numero_compte',
         'solde_initial',
         'date_creation',

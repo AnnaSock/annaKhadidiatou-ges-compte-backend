@@ -11,18 +11,16 @@ class CompteResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'numero_compte' => $this->numero_compte,
-            'solde_initial' => $this->solde_initial,
+            'numeroCompte' => $this->numero_compte,
             'titulaire' => $this->titulaire,
-            'type_compte' => $this->type_compte,
-            'devise' => $this->devise,
-            'date_creation' => $this->date_creation,
-            'statut_compte' => $this->statut_compte,
+            'type' => $this->type_compte->value,
             'solde' => $this->solde,
-            'motif_blocage' => $this->motif_blocage,
+            'devise' => $this->devise,
+            'dateCreation' => $this->date_creation,
+            'statut' => $this->statut_compte->value,
             'metadata' => [
-                'derniere_modification' => $this->updated_at->toIso8601String(),
-                'version' => 1
+                'derniereModification' => $this->updated_at->toIso8601String(),
+                'version' => $this->version ?? 1
             ]
         ];
     }

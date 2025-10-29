@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\HttpStatusCodes;
+use App\Enums\ResponseMessages;
 use App\Enums\StatutCompte;
 use App\Enums\TypeCompte;
 use App\Exceptions\CompteNotFoundException;
 use App\Http\Requests\StoreCompteRequest;
 use App\Http\Requests\UpdateCompteRequest;
 use App\Http\Resources\CompteResource;
+use App\Models\Client;
 use App\Models\Compte;
+use App\Services\CompteService;
 use App\Services\PaginationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+
 
 /**
  * @OA\Tag(
@@ -48,7 +53,7 @@ class CompteController extends Controller
      *         @OA\JsonContent(
      *             type="object",
      *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Compte")),
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object")),
      *             @OA\Property(property="message", type="string", example="Comptes récupérés avec succès"),
      *             @OA\Property(property="pagination", ref="#/components/schemas/Pagination"),
      *             @OA\Property(property="links", ref="#/components/schemas/Links")
@@ -85,7 +90,7 @@ class CompteController extends Controller
 
         return $this->successResponse(
             CompteResource::collection($result['items']),
-            'Comptes récupérés avec succès',
+            ResponseMessages::COMPTES_RECUPERES->value,
             $result['pagination'],
             $result['links']
         );
@@ -101,31 +106,102 @@ class CompteController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/comptes",
-     *     summary="Créer un nouveau compte",
+     *     path="/annaSock/v1/comptes",
+     *     summary="Créer un nouveau compte bancaire",
+     *     description="Permet de créer un compte bancaire pour un nouveau client ou un client existant avec validation complète des données.",
      *     tags={"Comptes"},
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/StoreCompteRequest")
+     *         description="Données pour créer un compte. Deux cas possibles : avec un client existant (id) ou en créant un nouveau client.",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             required={"type", "soldeInitial", "devise", "client"},
+     *             @OA\Property(property="type", type="string", enum={"cheque", "epargne"}, example="cheque"),
+     *             @OA\Property(property="soldeInitial", type="number", minimum=10000, example=500000),
+     *             @OA\Property(property="devise", type="string", enum={"XOF", "FCFA"}, example="XOF"),
+     *             @OA\Property(property="client", type="object",
+     *                 description="Informations du client. Utilisez 'id' pour un client existant ou les autres champs pour créer un nouveau client.",
+     *                 oneOf={
+     *                     @OA\Schema(
+     *                         title="Nouveau client",
+     *                         type="object",
+     *                         required={"titulaire", "email", "telephone", "adresse"},
+     *                         @OA\Property(property="titulaire", type="string", example="Cheikh Sy", description="Nom du titulaire"),
+     *                         @OA\Property(property="nci", type="string", example="1234567890123A", description="Numéro de carte d'identité nationale"),
+     *                         @OA\Property(property="email", type="string", format="email", example="cheikh.sy@example.com", description="Adresse email"),
+     *                         @OA\Property(property="telephone", type="string", example="+221771234567", description="Numéro de téléphone"),
+     *                         @OA\Property(property="adresse", type="string", example="Dakar, Sénégal", description="Adresse")
+     *                     ),
+     *                     @OA\Schema(
+     *                         title="Client existant",
+     *                         type="object",
+     *                         required={"id"},
+     *                         @OA\Property(property="id", type="integer", example=5, description="ID du client existant")
+     *                     )
+     *                 }
+     *             )
+     *         )
      *     ),
      *     @OA\Response(
      *         response=201,
-     *         description="Compte créé",
-     *         @OA\JsonContent(ref="#/components/schemas/Compte")
+     *         description="Compte créé avec succès",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Compte créé avec succès"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Données invalides",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Les données fournies sont invalides"),
+     *             @OA\Property(property="errors", type="object",
+     *                 example={
+     *                     "titulaire": "Le nom du titulaire est requis",
+     *                     "soldeInitial": "Le solde initial doit être supérieur à 0"
+     *                 }
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erreur de validation métier",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Erreur de validation")
+     *         )
      *     )
      * )
      */
     public function store(StoreCompteRequest $request)
     {
-        //
+        // Récupérer les données validées
+        $validated = $request->validated();
+
+        // Créer le compte via le service
+        $compte = CompteService::creerCompte($validated);
+
+        // Retourner la réponse avec le code 201 (Created)
+        return $this->successResponse(
+            new CompteResource($compte),
+            ResponseMessages::COMPTE_CREE->value,
+            null,
+            null,
+            HttpStatusCodes::CREATED
+        );
     }
 
     /**
      * @OA\Get(
      *     path="/annaSock/v1/comptes/{compte}",
      *     summary="Récupérer un compte spécifique",
-     *     description="Par défaut, la recherche se fait sur la base locale lorsque le compte est chèque ou épargne actif. Utilise le Route Model Binding et la validation.",
+     *     description="Permet de récupérer un compte spécifique (chèque ou épargne) quel que soit son statut (actif, bloqué, fermé). Utilise le Route Model Binding et la validation.",
      *     tags={"Comptes"},
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
@@ -141,7 +217,7 @@ class CompteController extends Controller
      *         @OA\JsonContent(
      *             type="object",
      *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="data", ref="#/components/schemas/Compte"),
+     *             @OA\Property(property="data", type="object"),
      *             @OA\Property(property="message", type="string", example="Compte récupéré avec succès")
      *         )
      *     ),
@@ -167,23 +243,14 @@ class CompteController extends Controller
      */
     public function show(Compte $compte)
     {
-        // Validation automatique via Route Model Binding
-        // Le modèle Compte est automatiquement résolu par Laravel
-        // avec les scopes globaux appliqués (not_deleted)
-
-        // Vérification supplémentaire : compte doit être actif et de type valide
-        if ($compte->statut_compte !== StatutCompte::Actif) {
-            throw new CompteNotFoundException('Le compte n\'est pas actif.');
-        }
-
         if (!in_array($compte->type_compte, [TypeCompte::Cheque, TypeCompte::Epargne])) {
-            throw new CompteNotFoundException('Type de compte non valide pour cette opération.');
+            throw new CompteNotFoundException(ResponseMessages::TYPE_COMPTE_INVALIDE->value);
         }
 
         // Retourner la réponse formatée avec le trait ApiResponse
         return $this->successResponse(
             new CompteResource($compte),
-            'Compte récupéré avec succès'
+            ResponseMessages::COMPTE_RECUPERE->value
         );
     }
 
@@ -209,12 +276,12 @@ class CompteController extends Controller
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/UpdateCompteRequest")
+     *         @OA\JsonContent(type="object")
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Compte mis à jour",
-     *         @OA\JsonContent(ref="#/components/schemas/Compte")
+     *         @OA\JsonContent(type="object")
      *     )
      * )
      */

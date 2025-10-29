@@ -28,6 +28,9 @@ Route::prefix('/v1')->group(function () {
     // Route GET pour lister les comptes actifs et valides
     Route::get('/comptes', [CompteController::class, 'index']);
 
+    // Route POST pour créer un nouveau compte
+    Route::post('/comptes', [CompteController::class, 'store']);
+
     // Route GET pour récupérer un compte spécifique
     Route::get('/comptes/{compte}', [CompteController::class, 'show']);
 });

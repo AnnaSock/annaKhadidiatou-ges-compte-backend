@@ -56,6 +56,18 @@ enum ValidationMessages: string
     case MONTANT_MIN = 'Le montant doit être supérieur à 0.';
     case MONTANT_MAX = 'Le montant ne peut pas dépasser 999999999999.99.';
 
+    // Messages spécifiques aux comptes
+    case SOLDE_INITIAL_REQUIRED = 'Le solde initial est obligatoire.';
+    case SOLDE_INITIAL_NUMERIC = 'Le solde initial doit être un nombre.';
+    case SOLDE_INITIAL_MIN = 'Le solde initial doit être d\'au moins 10 000 FCFA.';
+    case DEVISE_REQUIRED = 'La devise est obligatoire.';
+    case CLIENT_REQUIRED = 'Les informations du client sont obligatoires.';
+    case CLIENT_ARRAY = 'Les informations du client doivent être un objet.';
+    case TITULAIRE_REQUIRED_IF = 'Le nom du titulaire est obligatoire pour un nouveau client.';
+    case CNI_REGEX = 'Le numéro CNI doit être au format sénégalais valide (13 chiffres suivis d\'une lettre majuscule).';
+    case TELEPHONE_SENEGALAIS_INVALID = 'Le numéro de téléphone doit être au format sénégalais valide (+221 7X XXX XX XX ou +221 76 XXX XX XX).';
+    case ADRESSE_REQUIRED = 'L\'adresse est obligatoire.';
+
     public function getMessage(): string
     {
         return $this->value;

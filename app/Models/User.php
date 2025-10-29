@@ -16,6 +16,7 @@ abstract class User extends Authenticatable
     protected $keyType = 'string';
 
     protected $fillable = [
+        'id',
         'nom',
         'prenom',
         'telephone',
@@ -41,6 +42,12 @@ abstract class User extends Authenticatable
             if (! $user->role) {
                 $user->role = static::defaultRole()->value;
             }
+        });
+
+        // Résoudre la classe concrète basée sur le rôle
+        static::retrieved(function ($user) {
+            // Cette méthode est appelée après récupération depuis la DB
+            // Laravel devrait déjà connaître la classe concrète à utiliser
         });
     }
 
